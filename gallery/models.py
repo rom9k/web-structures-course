@@ -5,6 +5,8 @@ class Asset(models.Model):
 
     file = models.FileField(upload_to="3d_assets/", verbose_name="3D файл")
 
+    image = models.ImageField(upload_to='thumbnails/', blank=True, null=True, verbose_name="Превью")
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата загрузки")
 
     def __str__(self):

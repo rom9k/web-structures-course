@@ -1,33 +1,83 @@
+{% load static %}
 <!doctype html>
 <html lang="ru">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <title>3D Storage</title>
-  </head>
-  <body>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <link rel="stylesheet" href="{% static 'gallery/style.css' %}">
+</head>
+<body>
     <header>
       <h1>{{page_title}}</h1>
+       <a href="{% url 'upload' %}" class="btn" style="background-color: #28a745;">+ Загрузить модель</a>
     </header>
 
     <main>
-      <h2>Доступные ассеты:</h2>
+        <div class="gallery-grid">
+            
+            {% for asset in assets %}
+                <div class="asset-card">
+                    <div class="card-preview js-load-3d"
+                        id="model-container-{{ asset.id }}"
+                        data-url="{{ asset.file.url }}"
+                        {% if asset.image %}
+                        style="background-image: url('{{ asset.image.url }}');"
+                        {% endif %}
+                        >
 
-      <ul>
-        {% for asset in assets %}
-        <li>
-          <strong>{{ asset.title }}</strong>
-          <small>(Размер: {{ asset.file.size|filesizeformat }})</small>
-          <a href="{{asset.file.url}}" download="">[Скачать файл]</a>
-        </li>
-        {% empty %}
-        <li>Нет доступных моделей.</li>
-        {% endfor %}
-      </ul>
-      <a href="/about">О нас</a>
+                        {% if asset.image %}
+                        <div class="play-btn">▶</div>
+                        {% else %}
+                        <span style="font-size: 2rem;">🎲</span>
+                        {% endif %}
+
+                    </div>
+                    <div class="card-info">
+                        <h3 class="card-title">{{ asset.title }}</h3>
+                        
+                        <div class="card-meta">
+                            <span> {{ asset.created_at|date:"d M Y" }}</span>
+                            {% if asset.file %}
+                                <span style="float: right;"> {{ asset.file.size|filesizeformat }}</span>
+                            {% endif %}
+                        </div>
+                        {% if asset.file %}
+                            <a href="{{ asset.file.url }}" class="btn" download>Скачать .glb</a>
+                        {% else %}
+                            <span style="color: red;">Файл потерян</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <p>База пуста.</p>
+            {% endfor %}
+        </div>
     </main>
+    <script type="module">
+        import { loadModel } from "{% static 'gallery/js/viewer.js' %}";
 
-    <footer>
-      <p>&copy; 2026 Web Structures Course</p>
-    </footer>
-  </body>
-</html>
+        const containers = document.querySelectorAll('.js-load-3d');
+
+        containers.forEach(container => {
+            container.addEventListener('click', function() {
+                if (this.querySelector('canvas')) return;
+                this.innerHTML = ''; 
+                const id = this.id;
+                const url = this.dataset.url;
+
+                if (url) {
+                    console.log("Загружаю 3D по требованию:", url);
+                    loadModel(id, url);
+                }
+            });
+        });
+    </script>
+</body>

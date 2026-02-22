@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка модели</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        button { padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Загрузить новую 3D модель</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <p>Авто-генерация превью:</p>
+
+            <div id="preview-container" style="width: 300px; height: 200px; background: #eee; border: 1px solid #ccc;">
+                <span style="display: block; padding: 80px 0; text-align: center; color: #999;">Выберите файл...</span>
+            </div>
+
+            <input type="hidden" name="image_data" id="id_image_data">
+        </div>
+        <button type="submit"  id="submit-btn" disabled>Загрузить в базу</button>
+
+        {% load static %}
+        <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+        </script>
+        <script type="module" src="{% static 'gallery/js/autothumb.js' %}"></script>
+        
+    </form>
+    <br>
+    <a href="{% url 'home' %}">← Назад в галерею</a>
+</body>
+</html>
