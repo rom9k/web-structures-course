@@ -6,12 +6,32 @@ from .forms import AssetForm
 from django.contrib import messages
 
 def home(request):
-    assets = Asset.objects.all().order_by('-created_at')
+    
+     # 1. Получаем параметры из URL (GET-запроса)
+    search_query = request.GET.get('q', '')
+    ordering = request.GET.get('ordering', 'new')
+    
+    # 2. Базовый запрос: Берем ВСЕ
+    assets = Asset.objects.all()
+    
+    # 3. Применяем поиск (если пользователь что-то ввел)
+    if search_query:
+        assets = assets.filter(title__icontains=search_query)
+    
+    # 4. Применяем сортировку
+    if ordering == 'old':
+        assets = assets.order_by('created_at')
+    elif ordering == 'name':
+        assets = assets.order_by('title')
+    else:
+        assets = assets.order_by('-created_at')
 
+    # 5. Отдаем результат
     context_data = {
         'page_title': 'Главная Галерея',
         'assets': assets,
     }
+
     return render(request, 'gallery/index.html', context_data)
 
 def about(request):

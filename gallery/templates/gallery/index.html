@@ -19,7 +19,34 @@
       <h1>{{page_title}}</h1>
        <a href="{% url 'upload' %}" class="btn" style="background-color: #28a745;">+ Загрузить модель</a>
     </header>
+        <div class="toolbar">
+            <form action="{% url 'home' %}" method="get" style="display: flex; width: 100%; gap: 10px; align-items: center;">
 
+                <input
+                    type="text"
+                    name="q"
+                    class="search-input"
+                    placeholder="Найти 3D модель..."
+                    value="{{ request.GET.q|default:'' }}"
+                >
+
+                <select name="ordering" class="sort-select"onchange=" this.form.submit()">
+                    <option value="new" {% if request.GET.ordering == 'new' %}selected{% endif %}>Сначала новые</option>
+
+                    <option value="old" {% if request.GET.ordering == 'old' %}selected{% endif %}>Сначала старые</option>
+
+                    <option value="name" {% if request.GET.ordering == 'name' %}selected{% endif %}>По имени (А-Я)</option>
+                </select>
+
+                <!-- 3. Кнопка поиска -->
+                <button type="submit" class="search-btn">Найти</button>
+
+                <!-- 4. Кнопка сброса -->
+                {% if request.GET.q or request.GET.ordering %}
+                    <a href="{% url 'home' %}" class="reset-link">✖ Сбросить</a>
+                {% endif %}
+            </form>
+        </div>
     <main>
         <div class="gallery-grid">
             
@@ -57,9 +84,19 @@
                     </div>
                 </div>
             {% empty %}
-                <p>База пуста.</p>
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    
+                    {% if request.GET.q %}
+                        <!-- Если был поиск -->
+                        <h3>По запросу "<b>{{ request.GET.q }}</b>" ничего не найдено 😈</h3>
+                        <p>Попробуйте изменить запрос или <a href="{% url 'home' %}">сбросить фильтры</a>.</p>
+                    {% else %}
+                        <!-- Если база реально пуста -->
+                        <h3>База пуста.</h3>
+                        <p>Загрузите первую модель!</p>
+                    {% endif %}
+                </div>
             {% endfor %}
-        </div>
     </main>
     <script type="module">
         import { loadModel } from "{% static 'gallery/js/viewer.js' %}";
