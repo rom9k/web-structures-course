@@ -1,4 +1,5 @@
 {% load static %}
+{% load gallery_extras %}
 <!doctype html>
 <html lang="ru">
 <head>
@@ -15,6 +16,16 @@
     <link rel="stylesheet" href="{% static 'gallery/style.css' %}">
 </head>
 <body>
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <header>
       <h1>{{page_title}}</h1>
        <a href="{% url 'upload' %}" class="btn" style="background-color: #28a745;">+ Загрузить модель</a>
@@ -48,9 +59,10 @@
             </form>
         </div>
     <main>
+
         <div class="gallery-grid">
             
-            {% for asset in assets %}
+            {% for asset in page_obj %}
                 <div class="asset-card">
                     <div class="card-preview js-load-3d"
                         id="model-container-{{ asset.id }}"
@@ -97,6 +109,25 @@
                     {% endif %}
                 </div>
             {% endfor %}
+        </div> 
+        
+        <div class="pagination">
+            <span class="step-links">
+                
+                {% if page_obj.has_previous %}
+                    <a href="?{% param_replace request page=1 %}">&laquo; Первая</a>
+                    <a href="?{% param_replace request page=page_obj.previous_page_number %}">Назад</a>
+                {% endif %}
+                <span class="current">
+                    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?{% param_replace request page=page_obj.next_page_number %}">Далее</a>
+                    <a href="?{% param_replace request page=page_obj.paginator.num_pages %}">Последняя &raquo;</a>
+                {% endif %}
+
+            </span>
+        </div>
     </main>
     <script type="module">
         import { loadModel } from "{% static 'gallery/js/viewer.js' %}";

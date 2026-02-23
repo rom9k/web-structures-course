@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from .models import Asset
 from .forms import AssetForm
 from django.contrib import messages
+from django.core.paginator import Paginator
 
 def home(request):
     
@@ -26,10 +27,16 @@ def home(request):
     else:
         assets = assets.order_by('-created_at')
 
+    paginator = Paginator(assets, 8)
+
+    page_number = request.GET.get('page')
+
+    page_obj = paginator.get_page(page_number)
+
     # 5. Отдаем результат
     context_data = {
         'page_title': 'Главная Галерея',
-        'assets': assets,
+        'page_obj' : page_obj,
     }
 
     return render(request, 'gallery/index.html', context_data)
@@ -61,6 +68,8 @@ def upload(request):
                 new_asset.image.save(file_name, ContentFile(data), save=False)
             # 3. Финальное сохранение в БД
             new_asset.save()
+
+            messages.success(request, f'Модель "{new_asset.title}" успешно загружена!')
             
             return redirect('home')
     else:
